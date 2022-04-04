@@ -38,6 +38,7 @@ namespace RoadRegistry.BackOffice.Scenarios
         public ExtractScenarios() : base(CreateComparisonConfig())
         {
             Fixture.CustomizeExternalExtractRequestId();
+            Fixture.CustomizeExtractDescription();
             Fixture.CustomizeRoadNetworkExtractGeometry();
             Fixture.CustomizeArchiveId();
         }
@@ -47,19 +48,21 @@ namespace RoadRegistry.BackOffice.Scenarios
         {
             var externalExtractRequestId = Fixture.Create<ExternalExtractRequestId>();
             var extractRequestId = ExtractRequestId.FromExternalRequestId(externalExtractRequestId);
+            var extractDescription = Fixture.Create<ExtractDescription>();
             var downloadId = Fixture.Create<DownloadId>();
             var contour = Fixture.Create<RoadNetworkExtractGeometry>();
 
             return Run(scenario => scenario
                 .GivenNone()
-                .When(TheExternalSystem.PutsInARoadNetworkExtractRequest(externalExtractRequestId, downloadId, contour))
-                .Then(RoadNetworkExtracts.ToStreamName(extractRequestId), new RoadNetworkExtractGotRequested
+                .When(TheExternalSystem.PutsInARoadNetworkExtractRequest(externalExtractRequestId, downloadId, contour, extractDescription))
+                .Then(RoadNetworkExtracts.ToStreamName(extractRequestId), new RoadNetworkExtractGotRequestedV2
                 {
                     RequestId = extractRequestId,
                     ExternalRequestId = externalExtractRequestId,
                     DownloadId = downloadId,
                     Contour = FlattenContour(contour),
-                    When = InstantPattern.ExtendedIso.Format(Clock.GetCurrentInstant())
+                    When = InstantPattern.ExtendedIso.Format(Clock.GetCurrentInstant()),
+                    Description = extractDescription
                 })
             );
         }
@@ -74,28 +77,32 @@ namespace RoadRegistry.BackOffice.Scenarios
         {
             var externalExtractRequestId = Fixture.Create<ExternalExtractRequestId>();
             var extractRequestId = ExtractRequestId.FromExternalRequestId(externalExtractRequestId);
+            var oldExtractDescription = Fixture.Create<ExtractDescription>();
+            var newExtractDescription = Fixture.Create<ExtractDescription>();
             var oldDownloadId = Fixture.Create<DownloadId>();
             var newDownloadId = Fixture.Create<DownloadId>();
             var oldContour = Fixture.Create<RoadNetworkExtractGeometry>();
             var newContour = Fixture.Create<RoadNetworkExtractGeometry>();
 
             return Run(scenario => scenario
-                .Given(RoadNetworkExtracts.ToStreamName(extractRequestId), new RoadNetworkExtractGotRequested
+                .Given(RoadNetworkExtracts.ToStreamName(extractRequestId), new RoadNetworkExtractGotRequestedV2
                 {
                     RequestId = extractRequestId,
                     ExternalRequestId = externalExtractRequestId,
                     DownloadId = oldDownloadId,
                     Contour = oldContour,
-                    When = InstantPattern.ExtendedIso.Format(Clock.GetCurrentInstant())
+                    When = InstantPattern.ExtendedIso.Format(Clock.GetCurrentInstant()),
+                    Description = oldExtractDescription
                 })
-                .When(TheExternalSystem.PutsInARoadNetworkExtractRequest(externalExtractRequestId, newDownloadId, newContour))
-                .Then(RoadNetworkExtracts.ToStreamName(extractRequestId), new RoadNetworkExtractGotRequested
+                .When(TheExternalSystem.PutsInARoadNetworkExtractRequest(externalExtractRequestId, newDownloadId, newContour, newExtractDescription))
+                .Then(RoadNetworkExtracts.ToStreamName(extractRequestId), new RoadNetworkExtractGotRequestedV2
                 {
                     RequestId = extractRequestId,
                     ExternalRequestId = externalExtractRequestId,
                     DownloadId = newDownloadId,
                     Contour = FlattenContour(newContour),
-                    When = InstantPattern.ExtendedIso.Format(Clock.GetCurrentInstant())
+                    When = InstantPattern.ExtendedIso.Format(Clock.GetCurrentInstant()),
+                    Description = newExtractDescription
                 })
             );
         }
@@ -105,20 +112,22 @@ namespace RoadRegistry.BackOffice.Scenarios
         {
             var externalExtractRequestId = Fixture.Create<ExternalExtractRequestId>();
             var extractRequestId = ExtractRequestId.FromExternalRequestId(externalExtractRequestId);
+            var extractDescription = Fixture.Create<ExtractDescription>();
             var downloadId = Fixture.Create<DownloadId>();
             var oldContour = Fixture.Create<RoadNetworkExtractGeometry>();
             var newContour = Fixture.Create<RoadNetworkExtractGeometry>();
 
             return Run(scenario => scenario
-                .Given(RoadNetworkExtracts.ToStreamName(extractRequestId), new RoadNetworkExtractGotRequested
+                .Given(RoadNetworkExtracts.ToStreamName(extractRequestId), new RoadNetworkExtractGotRequestedV2
                 {
                     RequestId = extractRequestId,
                     ExternalRequestId = externalExtractRequestId,
                     DownloadId = downloadId,
                     Contour = oldContour,
-                    When = InstantPattern.ExtendedIso.Format(Clock.GetCurrentInstant())
+                    When = InstantPattern.ExtendedIso.Format(Clock.GetCurrentInstant()),
+                    Description = extractDescription
                 })
-                .When(TheExternalSystem.PutsInARoadNetworkExtractRequest(externalExtractRequestId, downloadId, newContour))
+                .When(TheExternalSystem.PutsInARoadNetworkExtractRequest(externalExtractRequestId, downloadId, newContour, extractDescription))
                 .ThenNone()
             );
         }

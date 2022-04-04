@@ -11,6 +11,7 @@ namespace RoadRegistry.BackOffice.Extracts
         public static readonly Func<RoadNetworkExtract> Factory = () => new RoadNetworkExtract();
 
         private ExternalExtractRequestId _externalExtractRequestId;
+        private ExtractDescription _extractDescription;
 
         private readonly List<DownloadId> _requestedDownloads;
         private readonly HashSet<DownloadId> _announcedDownloads;
@@ -28,6 +29,14 @@ namespace RoadRegistry.BackOffice.Extracts
                 _externalExtractRequestId = new ExternalExtractRequestId(e.ExternalRequestId);
                 _requestedDownloads.Add(new DownloadId(e.DownloadId));
             });
+
+            On<RoadNetworkExtractGotRequestedV2>(e =>
+            {
+                Id = ExtractRequestId.FromString(e.RequestId);
+                _externalExtractRequestId = new ExternalExtractRequestId(e.ExternalRequestId);
+                _extractDescription = new ExtractDescription(e.Description);
+                _requestedDownloads.Add(new DownloadId(e.DownloadId));
+            });
             On<RoadNetworkExtractDownloadBecameAvailable>(e =>
             {
                 _announcedDownloads.Add(new DownloadId(e.DownloadId));
@@ -40,32 +49,34 @@ namespace RoadRegistry.BackOffice.Extracts
 
         public ExtractRequestId Id { get; private set; }
 
-        public static RoadNetworkExtract Request(
-            ExternalExtractRequestId externalExtractRequestId,
+        public static RoadNetworkExtract Request(ExternalExtractRequestId externalExtractRequestId,
             DownloadId downloadId,
-            IPolygonal contour)
+            IPolygonal contour,
+            ExtractDescription extractDescription)
         {
             var instance = Factory();
-            instance.Apply(new RoadNetworkExtractGotRequested
+            instance.Apply(new RoadNetworkExtractGotRequestedV2
             {
                 RequestId = ExtractRequestId.FromExternalRequestId(externalExtractRequestId).ToString(),
                 ExternalRequestId = externalExtractRequestId,
                 DownloadId = downloadId,
-                Contour = GeometryTranslator.TranslateToRoadNetworkExtractGeometry(contour)
+                Contour = GeometryTranslator.TranslateToRoadNetworkExtractGeometry(contour),
+                Description = extractDescription
             });
             return instance;
         }
 
-        public void RequestAgain(DownloadId downloadId, IPolygonal contour)
+        public void RequestAgain(DownloadId downloadId, IPolygonal contour, ExtractDescription extractDescription)
         {
             if (!_requestedDownloads.Contains(downloadId))
             {
-                Apply(new RoadNetworkExtractGotRequested
+                Apply(new RoadNetworkExtractGotRequestedV2
                 {
                     RequestId = Id.ToString(),
                     ExternalRequestId = _externalExtractRequestId,
                     DownloadId = downloadId,
-                    Contour = GeometryTranslator.TranslateToRoadNetworkExtractGeometry(contour)
+                    Contour = GeometryTranslator.TranslateToRoadNetworkExtractGeometry(contour),
+                    Description = extractDescription
                 });
             }
         }

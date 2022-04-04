@@ -24,6 +24,10 @@ namespace RoadRegistry.BackOffice.Api.Extracts
                 .NotEmpty().WithMessage("'NisCode' must not be empty, null or missing")
                 .Must(HaveExpectedFormat).WithMessage("Invalid NIS-code. Expected format: '12345'")
                 .MustAsync(BeKnownNisCode).WithMessage("'NisCode' must be a known NIS-code");
+
+            RuleFor(c => c.Description)
+                .NotNull().WithMessage("'Description' must not be null or missing")
+                .MaximumLength(250).WithMessage("'Description' must not be longer than 250 characters");
         }
 
         private bool HaveExpectedFormat(string nisCode)

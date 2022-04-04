@@ -8,13 +8,15 @@ namespace RoadRegistry.BackOffice.Scenarios
         public static Command PutsInARoadNetworkExtractRequest(
             ExternalExtractRequestId requestId,
             DownloadId downloadId,
-            RoadNetworkExtractGeometry contour)
+            RoadNetworkExtractGeometry contour,
+            ExtractDescription description)
         {
             return new Command(new RequestRoadNetworkExtract
             {
                 ExternalRequestId = requestId,
                 DownloadId = downloadId,
-                Contour = contour
+                Contour = contour,
+                Description = description
             });
         }
 

@@ -22,7 +22,11 @@ namespace RoadRegistry.BackOffice.Api.Extracts
                 .When(c => !string.IsNullOrEmpty(c.Contour), ApplyConditionTo.CurrentValidator);
 
             RuleFor(c => c.Buffer)
+                .NotNull().WithMessage("'Description' must not be null or missing")
                 .InclusiveBetween(0, 100).WithMessage("'Buffer' must be a value between 0 and 100");
+
+            RuleFor(c => c.Description)
+                .MaximumLength(250).WithMessage("'Description' must not be longer than 250 characters");
         }
 
         private bool BeMultiPolygonGeometryAsWellKnownText(string text)

@@ -7,12 +7,9 @@ namespace RoadRegistry.BackOffice.ExtractHost.ZipArchiveWriters
     using System.Threading;
     using System.Threading.Tasks;
     using Be.Vlaanderen.Basisregisters.Shaperon;
-    using Be.Vlaanderen.Basisregisters.Shaperon.Geometries;
     using Editor.Schema;
     using Editor.Schema.Extracts;
-    using Editor.Schema.RoadNodes;
     using Extracts;
-    using Microsoft.IO;
 
     public class TransactionZoneToZipArchiveWriter : IZipArchiveWriter<EditorContext>
     {
@@ -50,8 +47,9 @@ namespace RoadRegistry.BackOffice.ExtractHost.ZipArchiveWriters
                     TYPE = {Value = 2},
                     BESCHRIJV =
                     {
-                        Value =
-                            $"Extract[DownloadId={request.DownloadId.ToGuid():N};RequestId={request.ExternalRequestId.ToString()}]"
+                        Value = string.IsNullOrEmpty(request.Description)
+                            ? $"Extract[DownloadId={request.DownloadId.ToGuid():N};RequestId={request.ExternalRequestId.ToString()}]"
+                            : request.Description
                     },
                     OPERATOR = {Value = ""},
                     ORG = {Value = "AGIV"},

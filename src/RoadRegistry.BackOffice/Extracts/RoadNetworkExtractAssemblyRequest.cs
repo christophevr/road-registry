@@ -9,13 +9,15 @@ namespace RoadRegistry.BackOffice.Extracts
         public ExtractRequestId RequestId { get; }
         public DownloadId DownloadId { get; }
         public IPolygonal Contour { get; }
+        public ExtractDescription Description { get; }
 
-        public RoadNetworkExtractAssemblyRequest(ExternalExtractRequestId requestId, DownloadId downloadId, IPolygonal contour)
+        public RoadNetworkExtractAssemblyRequest(ExternalExtractRequestId requestId, DownloadId downloadId, IPolygonal contour, ExtractDescription description)
         {
             ExternalRequestId = requestId;
             RequestId = ExtractRequestId.FromExternalRequestId(requestId);
             DownloadId = downloadId;
             Contour = contour ?? throw new ArgumentNullException(nameof(contour));
+            Description = description;
         }
     }
 }

@@ -94,7 +94,8 @@ namespace RoadRegistry.BackOffice.Api.Extracts
 
                 Func<Task> act = () => validator.ValidateAndThrowAsync(new DownloadExtractByNisCodeRequestBody
                 {
-                    NisCode = nisCode
+                    NisCode = nisCode,
+                    Description = "description"
                 });
 
                 await act.Should().NotThrowAsync<ValidationException>();
