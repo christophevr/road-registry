@@ -8,7 +8,7 @@ namespace RoadRegistry.BackOffice.Core
 
     public class RoadNetworkCommandModule : CommandHandlerModule
     {
-        public RoadNetworkCommandModule(IStreamStore store, IRoadNetworkSnapshotReader snapshotReader, IClock clock)
+        public RoadNetworkCommandModule(IStreamStore store, IRoadNetworkSnapshotReader snapshotReader, IRoadNetworkSnapshotWriter snapshotWriter, IClock clock)
         {
             if (store == null) throw new ArgumentNullException(nameof(store));
             if (snapshotReader == null) throw new ArgumentNullException(nameof(snapshotReader));
@@ -24,7 +24,9 @@ namespace RoadRegistry.BackOffice.Core
                     var reason = new Reason(message.Body.Reason);
                     var organizationId = new OrganizationId(message.Body.OrganizationId);
                     var organization = await context.Organizations.TryGet(organizationId, ct);
-                    var translation = organization == null ? Organization.PredefinedTranslations.Unknown : organization.Translation;
+                    var translation = organization == null
+                        ? Organization.PredefinedTranslations.Unknown
+                        : organization.Translation;
 
                     var network = await context.RoadNetworks.Get(ct);
                     var translator = new RequestedChangeTranslator(
@@ -41,6 +43,14 @@ namespace RoadRegistry.BackOffice.Core
                     );
                     var requestedChanges = await translator.Translate(message.Body.Changes, context.Organizations, ct);
                     network.Change(request, reason, @operator, translation, requestedChanges);
+                });
+
+            For<RequestRoadNetworkSnapshotRefresh>()
+                .UseRoadRegistryContext(store, snapshotReader, EnrichEvent.WithTime(clock))
+                .Handle(async (context, message, ct) =>
+                {
+                    var (network, version) = await context.RoadNetworks.GetWithVersion(ct);
+                    await snapshotWriter.WriteSnapshot(network.TakeSnapshot(), version, ct);
                 });
         }
     }

@@ -51,6 +51,9 @@ namespace RoadRegistry.BackOffice
                     case Messages.RoadNetworkChangesRejected m:
                         m.When = pattern.Format(clock.GetCurrentInstant());
                         break;
+                    case Messages.RequestRoadNetworkSnapshotRefresh m:
+                        m.When = pattern.Format(clock.GetCurrentInstant());
+                        break;
                     // Extracts
                     case Messages.RoadNetworkExtractGotRequested m:
                         m.When = pattern.Format(clock.GetCurrentInstant());

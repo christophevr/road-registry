@@ -231,6 +231,7 @@ namespace RoadRegistry.BackOffice.Api
                                 new RoadNetworkCommandModule(
                                     sp.GetService<IStreamStore>(),
                                     sp.GetService<IRoadNetworkSnapshotReader>(),
+                                    sp.GetService<IRoadNetworkSnapshotWriter>(),
                                     sp.GetService<IClock>()
                                 ),
                                 new RoadNetworkExtractCommandModule(
